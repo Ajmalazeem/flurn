@@ -7,7 +7,7 @@ import (
 
 type LoanStore interface {
 	Create(models.LoanRequest) error
-	List() ([]models.LoanRequest, error)
+	List(models.ListRequest) ([]models.LoanRequest, error)
 	Get()
 }
 
@@ -19,10 +19,20 @@ func (ls *loanStore) Create(req models.LoanRequest) error {
 	return ls.db.Table("loan").Create(&req).Error
 }
 
-func (ls *loanStore) List() ([]models.LoanRequest, error) {
+func (ls *loanStore) List(req models.ListRequest) ([]models.LoanRequest, error) {
 	var result []models.LoanRequest
 
-	if err := ls.db.Table("loan").Find(&result).Error; err != nil {
+	query := ls.db.Table("loan")
+
+	if len(req.Status) > 0 {
+		query = query.Where("status in ?", req.Status)
+	}
+
+	if req.LoanAmountGreater > 0 {
+		query = query.Where("loan_amount > ?", req.LoanAmountGreater)
+	}
+
+	if err := query.Debug().Find(&result).Error; err != nil {
 		return nil, err
 	}
 

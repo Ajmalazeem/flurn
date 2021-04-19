@@ -3,8 +3,9 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/Ajmalazeem/flurn/models"
 	"github.com/go-kit/kit/endpoint"
@@ -38,16 +39,27 @@ func makeCreateEndpoint(svc Loan) endpoint.Endpoint {
 }
 
 func decodeListRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var req models.ListRequest
 
-	status := r.URL.Query().Get("status")
-	log.Println(status)
+	statuses := r.URL.Query().Get("status")
+	if len(statuses) > 0 {
+		req.Status = strings.Split(statuses, ",")
+	}
 
-	return nil, nil
+	loanAmt := r.URL.Query().Get("loanAmountGreater")
+	val, err := strconv.ParseFloat(loanAmt, 64)
+	if err != nil {
+		return nil, err
+	}
+	req.LoanAmountGreater = val
+
+	return req, nil
 }
 
 func makeListEndpoint(svc Loan) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		return svc.List()
+		req := request.(models.ListRequest)
+		return svc.List(req)
 	}
 }
 

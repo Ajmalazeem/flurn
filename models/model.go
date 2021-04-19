@@ -8,3 +8,8 @@ type LoanRequest struct {
 	Status       string  `json:"status,omitempty" gorm:"column:status"`
 	CreditScore  float64 `json:"credit_score,omitempty" gorm:"column:credit_score"`
 }
+
+type ListRequest struct {
+	Status            []string
+	LoanAmountGreater float64
+}
