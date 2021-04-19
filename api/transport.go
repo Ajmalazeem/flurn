@@ -68,6 +68,7 @@ func decodeGetRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	var req models.GetRequest
 	vars := mux.Vars(r)
 	id := vars["id"]
+	
 
 	var err error
 	req.Id, err = strconv.Atoi(id)
@@ -87,6 +88,69 @@ func makeGetEndpoint(svc Loan) endpoint.Endpoint {
 		return svc.Get(req)
 	}
 }
+
+func decodeApproveRequest(_ context.Context, r *http.Request) (interface{}, error) {
+
+	var req models.ApproveRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, err
+	}
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	var err error
+	req.Id, err = strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+
+
+
+	return req, nil
+}
+
+// Endpoints are a primary abstraction in go-kit. An endpoint represents a single RPC (method in our service interface)
+func makeApproveEndpoint(svc Loan) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(models.ApproveRequest)
+		
+		
+
+		return svc.Approve(req)
+	}
+}
+
+func decodeCancelRequest(_ context.Context, r *http.Request) (interface{}, error) {
+
+	var req models.CancelRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return nil, err
+	}
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	var err error
+	req.Id, err = strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+	
+	return req, nil
+}
+
+// Endpoints are a primary abstraction in go-kit. An endpoint represents a single RPC (method in our service interface)
+func makeCancelEndpoint(svc Loan) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(models.CancelRequest)
+		
+		
+
+		return svc.Cancel(req)
+	}
+}
+
 
 func MakeHandler(svc Loan) http.Handler {
 
@@ -108,11 +172,26 @@ func MakeHandler(svc Loan) http.Handler {
 		encodeResponse,
 	)
 
+	ApproveEndpoint := httptransport.NewServer(
+		makeApproveEndpoint(svc),
+		decodeApproveRequest,
+		encodeResponse,
+	)
+
+	CancelEndpoint := httptransport.NewServer(
+		makeCancelEndpoint(svc),
+		decodeCancelRequest,
+		encodeResponse,
+	)
+
 	router := mux.NewRouter()
 
 	router.Methods(http.MethodPost).Path("/loans").Handler(createHandler)
 	router.Methods(http.MethodGet).Path("/loans").Handler(listEndpoint)
 	router.Methods(http.MethodGet).Path("/loans/{id}").Handler(getEndpoint)
+	router.Methods(http.MethodPatch).Path("/loans/{id}").Handler(ApproveEndpoint)
+	router.Methods(http.MethodDelete).Path("/loans/{id}").Handler(CancelEndpoint)
+	
 	return router
 }
 

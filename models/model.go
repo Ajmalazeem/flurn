@@ -16,5 +16,15 @@ type ListRequest struct {
 
 type GetRequest struct {
 	Id int
-	
+
+}
+
+type ApproveRequest struct {
+	Id int
+	Status string
+}
+
+type CancelRequest struct {
+	Id int
+	Status string
 }

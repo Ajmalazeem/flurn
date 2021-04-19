@@ -9,6 +9,8 @@ type LoanStore interface {
 	Create(models.LoanRequest) error
 	List(models.ListRequest) ([]models.LoanRequest, error)
 	Get(models.GetRequest) (*models.LoanRequest, error)
+	Approve(models.ApproveRequest) (*models.LoanRequest, error)
+	Cancel(models.CancelRequest) (*models.LoanRequest, error)
 }
 
 type loanStore struct {
@@ -46,6 +48,21 @@ func (ls *loanStore) Get(req models.GetRequest) (*models.LoanRequest, error) {
 
    return &result, nil
 }
+func (ls *loanStore) Approve(req models.ApproveRequest) (*models.LoanRequest, error) {
+	var result models.LoanRequest
+     
+	ls.db.Table("loan").Where("id = ? ", req.Id).Updates(map[string]interface{}{"status" :req.Status})
+
+   return &result, nil
+}
+func (ls *loanStore) Cancel(req models.CancelRequest) (*models.LoanRequest, error) {
+	var result models.LoanRequest
+     
+	ls.db.Table("loan").Where("id = ? ", req.Id).Updates(map[string]interface{}{"status" :req.Status})
+
+   return &result, nil
+}
+
 
 func NewLoanStore(db *gorm.DB) LoanStore {
 	return &loanStore{
