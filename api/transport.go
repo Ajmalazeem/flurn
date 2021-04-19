@@ -124,9 +124,9 @@ func makeApproveEndpoint(svc Loan) endpoint.Endpoint {
 func decodeCancelRequest(_ context.Context, r *http.Request) (interface{}, error) {
 
 	var req models.CancelRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		return nil, err
-	}
+	req.Status= "Cancelled"
+
+	
 	vars := mux.Vars(r)
 	id := vars["id"]
 
