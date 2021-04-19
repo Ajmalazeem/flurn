@@ -13,3 +13,8 @@ type ListRequest struct {
 	Status            []string
 	LoanAmountGreater float64
 }
+
+type GetRequest struct {
+	Id int
+	
+}

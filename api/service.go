@@ -8,7 +8,7 @@ import (
 type Loan interface {
 	Create(models.LoanRequest)
 	List(models.ListRequest) ([]models.LoanRequest, error)
-	Get() *models.LoanRequest
+	Get(models.GetRequest) (*models.LoanRequest, error)
 	Approve()
 	Reject()
 	Cancel()
@@ -24,15 +24,15 @@ func (l *loan) Create(req models.LoanRequest) {
 func (l *loan) List(req models.ListRequest) ([]models.LoanRequest, error) {
 	return l.loanStore.List(req)
 }
-func (l *loan) Get() *models.LoanRequest {
-	return nil
+func (l *loan) Get(req models.GetRequest) (*models.LoanRequest, error) {
+	return l.loanStore.Get(req)
 }
 func (l *loan) Approve() {}
 func (l *loan) Reject()  {}
 func (l *loan) Cancel()  {}
 
 func NewLoanService(loanStore store.LoanStore) Loan {
-	return &loan{
+	return &loan {
 		loanStore: loanStore,
 	}
 }

@@ -63,6 +63,31 @@ func makeListEndpoint(svc Loan) endpoint.Endpoint {
 	}
 }
 
+func decodeGetRequest(_ context.Context, r *http.Request) (interface{}, error) {
+
+	var req models.GetRequest
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	var err error
+	req.Id, err = strconv.Atoi(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// Endpoints are a primary abstraction in go-kit. An endpoint represents a single RPC (method in our service interface)
+func makeGetEndpoint(svc Loan) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+
+		req := request.(models.GetRequest)
+
+		return svc.Get(req)
+	}
+}
+
 func MakeHandler(svc Loan) http.Handler {
 
 	createHandler := httptransport.NewServer(
@@ -77,11 +102,17 @@ func MakeHandler(svc Loan) http.Handler {
 		encodeResponse,
 	)
 
+	getEndpoint := httptransport.NewServer(
+		makeGetEndpoint(svc),
+		decodeGetRequest,
+		encodeResponse,
+	)
+
 	router := mux.NewRouter()
 
 	router.Methods(http.MethodPost).Path("/loans").Handler(createHandler)
 	router.Methods(http.MethodGet).Path("/loans").Handler(listEndpoint)
-
+	router.Methods(http.MethodGet).Path("/loans/{id}").Handler(getEndpoint)
 	return router
 }
 

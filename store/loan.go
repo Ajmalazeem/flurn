@@ -8,7 +8,7 @@ import (
 type LoanStore interface {
 	Create(models.LoanRequest) error
 	List(models.ListRequest) ([]models.LoanRequest, error)
-	Get()
+	Get(models.GetRequest) (*models.LoanRequest, error)
 }
 
 type loanStore struct {
@@ -38,7 +38,14 @@ func (ls *loanStore) List(req models.ListRequest) ([]models.LoanRequest, error) 
 
 	return result, nil
 }
-func (ls *loanStore) Get() {}
+func (ls *loanStore) Get(req models.GetRequest) (*models.LoanRequest, error) {
+	var result models.LoanRequest
+     
+	ls.db.Table("loan").Where("id = ?", req.Id).Find(&result)
+
+
+   return &result, nil
+}
 
 func NewLoanStore(db *gorm.DB) LoanStore {
 	return &loanStore{
